@@ -1,5 +1,6 @@
 
 package com.example.notificationdemo
+
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -9,12 +10,15 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import androidx.core.app.RemoteInput
 import androidx.core.app.NotificationCompat
 
 class MainActivity : AppCompatActivity() {
     lateinit var button: Button
     private val channelID = "com.example.notificationdemo.channel1"
     private var notificationManager:NotificationManager? = null
+    private val KEY_REPLY = "key_reply"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -33,6 +37,19 @@ class MainActivity : AppCompatActivity() {
         val pendingIntent:PendingIntent = PendingIntent.getActivity(
             this, 0, tapResultIntent, PendingIntent.FLAG_UPDATE_CURRENT
         )
+
+        // reply action
+        val remoteInput: RemoteInput = RemoteInput.Builder(KEY_REPLY).run {
+            setLabel("Insert your name here")
+            build()
+        }
+
+        val replyAction : NotificationCompat.Action = NotificationCompat.Action.Builder(
+            0, // not using Icon file
+            "REPLY",
+            pendingIntent
+        ).addRemoteInput(remoteInput)
+            .build()
 
         // action button
         val intent2 = Intent(this, DetailsActivity::class.java)
@@ -56,9 +73,10 @@ class MainActivity : AppCompatActivity() {
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(pendingIntent)
+            //.setContentIntent(pendingIntent)
             .addAction(action2)
             .addAction(action3)
+            .addAction(replyAction)
             .build()
         notificationManager?.notify(notificationId, notification)
     }
